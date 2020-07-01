@@ -1,11 +1,11 @@
+import 'dart:async';
 import 'dart:math' as math;
-
-import 'package:donutplugin/colors.dart';
-import 'package:donutplugin/pie_chart.dart';
+import 'dart:typed_data';
+import 'package:donutplugin/donut_src/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:touchable/touchable.dart';
-
+import 'dart:ui' as ui;
 import 'data_model.dart';
 
 class PieChartPainter extends CustomPainter {
@@ -52,20 +52,20 @@ class PieChartPainter extends CustomPainter {
       print("dsfdsf "+selectedDonutIndex.toString()+" "+i.toString());
       Paint paint;
 
-        if(i==selectedDonutIndex) {
-           paint = Paint()..color = selectedArcColor;
+      if(i==selectedDonutIndex) {
+        paint = Paint()..color = selectedArcColor;
+        paint.style = PaintingStyle.stroke;
+        paint.strokeWidth = selectedStrokeWidth;
+      }else {
+        if(i%2!=0&&i!=selectedDonutIndex-1&&i!=selectedDonutIndex+1&&(selectedDonutIndex==0?i!=values.length-1:true)){
+          paint = Paint()..color = Colors.white;
           paint.style = PaintingStyle.stroke;
-          paint.strokeWidth = selectedStrokeWidth;
-        }else {
-          if(i%2!=0&&i!=selectedDonutIndex-1&&i!=selectedDonutIndex+1&&(selectedDonutIndex==0?i!=values.length-1:true)){
-            paint = Paint()..color = Colors.white;
-            paint.style = PaintingStyle.stroke;
-          }
-          else
-           paint = Paint()..color = getColor(colorList, i);
-          paint.style = PaintingStyle.stroke;
-          paint.strokeWidth = strokeWidth;
         }
+        else
+          paint = Paint()..color = getColor(colorList, i);
+        paint.style = PaintingStyle.stroke;
+        paint.strokeWidth = strokeWidth;
+      }
       _paintList.add(paint);
     }
     _totalAngle = angleFactor * math.pi * 2;
@@ -81,7 +81,7 @@ class PieChartPainter extends CustomPainter {
     _prevAngle =0.0;
     for (int i = 0; i < _subParts.length; i++) {
       DonutData donutData=dataMap.keys.toList(growable: false)[i];
-        donutCanvas.drawArc(
+      donutCanvas.drawArc(
           new Rect.fromLTWH(0.0, 0.0, side, size.height),
           _prevAngle,
           (((_totalAngle) / _total) * _subParts[i]),
@@ -93,19 +93,8 @@ class PieChartPainter extends CustomPainter {
               this.onTap(donutData);
             }
           },
-            onPanDown:(tapdetail){
-              if(donutData.icon!=null&&donutData.title!=null) {
-                this.onTap(donutData);
-              }
-            },
-            onPanUpdate: (detail){
-              if(donutData.icon!=null&&donutData.title!=null) {
-                this.onTap(donutData);
-              }
-              //This callback runs when you drag this rectangle. Details of the location can be got from the detail object.
-              //Do stuff here. Probably change your state and animate
-            }
-        );
+
+      );
 
       final radius= side / 2;
       final x = (radius) *
@@ -126,9 +115,17 @@ class PieChartPainter extends CustomPainter {
     }
   }
 
-  void _drawIcon(Canvas canvas, DonutData donutData, double x, double y, double side) {
+  Future<ui.Image> _getImageFromBytes(Uint8List imageBytes) async {
+    var completer = Completer<ui.Image>();
+    ui.decodeImageFromList(imageBytes, (image) {
+      completer.complete(image);
+    });
 
-    IconData icon =donutData.icon;
+    return completer.future;
+  }
+  Future<void> _drawIcon(Canvas canvas, DonutData donutData, double x, double y, double side) async {
+
+    IconData icon =Icons.category;
     TextPainter tp = TextPainter(textDirection: TextDirection.ltr,
       textAlign: TextAlign.center,
     );
@@ -136,13 +133,38 @@ class PieChartPainter extends CustomPainter {
         style: TextStyle(fontSize: 20.0,fontFamily: icon.fontFamily));
     tp.layout();
 
-    tp.paint(
-      canvas,
-      new Offset(
-        (side / 2 + x) - (tp.width / 2),
-        (side / 2 + y) - (tp.height / 2),
-      ),
-    );
+//    tp.paint(
+//      canvas,
+//      new Offset(
+//        (side / 2 + x) - (tp.width / 2),
+//        (side / 2 + y) - (tp.height / 2),
+//      ),
+//    );
+    final paint = new Paint();
+    canvas.drawImage(donutData.icon, Offset(
+      (side / 2 + x) - (tp.width / 2),
+      (side / 2 + y) - (tp.height / 2),
+    ), paint);
+
+
+
+
+
+
+
+
+
+//    tp.text = TextSpan(text: String.fromCharCode(icon.codePoint),
+//        style: TextStyle(fontSize: 20.0,fontFamily: icon.fontFamily));
+    //  paint.layout();
+
+//    paint.paint(
+//      canvas,
+//      new Offset(
+//        (side / 2 + x) - (tp.width / 2),
+//        (side / 2 + y) - (tp.height / 2),
+//      ),
+//    );
     var _paint=Paint()
       ..color = Colors.blue
       ..strokeWidth = 1

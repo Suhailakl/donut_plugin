@@ -1,4 +1,4 @@
-import 'package:donutplugin/src/inner_chart_painter.dart';
+import 'package:donutplugin/donut_src/inner_chart_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:touchable/touchable.dart';
 
@@ -62,11 +62,11 @@ class _PieChartState extends State<PieChart>
   void initState() {
     super.initState();
     chartRadius=MediaQuery.of(widget.context).size.width / 1.7;
-    strokeWidth=MediaQuery.of(widget.context).size.width/8;
+    strokeWidth=MediaQuery.of(widget.context).size.width/7;
 
     int i=0;
     for(var it in widget.dataMap.entries ){
-      _newdataMap[it.key]= it.value/10;
+      _newdataMap[it.key]= it.value/8;
       _newdataMap[DonutData(amount: i,icon: null,percent: 1,title: null)]= 0.02;
       i++;
     }
@@ -155,6 +155,7 @@ class _PieChartState extends State<PieChart>
             child: CustomPaint(
               painter: InnerChartPainter(
                 _fraction,
+                context: context,
                 formatChartValues: widget.formatChartValues,
                 strokeWidth: strokeWidth,
                 dataMap: _newdataMap,

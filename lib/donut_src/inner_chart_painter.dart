@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:donutplugin/pie_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -19,8 +18,9 @@ class  InnerChartPainter extends CustomPainter {
   final Function formatChartValues;
   final double strokeWidth;
   final double radius;
+  final BuildContext context;
   final TextStyle innerPercentageStyle;
-  final TextStyle innerTitleStyle;
+   TextStyle innerTitleStyle;
   final TextStyle innerAmountStyle;
   DonutData selectedDonut;
   Map<DonutData, double> dataMap = Map();
@@ -29,6 +29,7 @@ class  InnerChartPainter extends CustomPainter {
   InnerChartPainter(
       double angleFactor, {
         this.chartValueBackgroundColor,
+        this.context,
         this.showValuesInPercentage,
         this.showChartValueLabel,
         this.centerText,
@@ -93,6 +94,31 @@ class  InnerChartPainter extends CustomPainter {
         text: spanTitle,
     );
     tpTitle.layout();
+
+    do{
+      if(tpTitle.width<MediaQuery.of(context).size.width/2.2){
+        break;
+      }else{
+        print("dSHKJNFkdsf");
+        innerTitleStyle=TextStyle(
+          color: innerTitleStyle.color,
+          fontSize: innerTitleStyle.fontSize-1,
+          fontStyle: innerTitleStyle.fontStyle,
+          fontWeight: innerTitleStyle.fontWeight,
+        );
+         spanTitle = TextSpan(
+          style: innerTitleStyle,
+          text: donutData.title.toString(),
+        );
+        tpTitle = TextPainter(textDirection: TextDirection.ltr,
+          textAlign: TextAlign.center,
+          text: spanTitle,
+        );
+        tpTitle.layout();
+      }
+    }while(tpTitle.width>MediaQuery.of(context).size.width/2.2);
+  if(tpTitle.width<MediaQuery.of(context).size.width/2.2){
+    print("dsjhfjdsf");
     tpTitle.paint(
       canvas,
       new Offset(
@@ -100,6 +126,8 @@ class  InnerChartPainter extends CustomPainter {
         (sideTitle / 1.1 + y) - (tpTitle.height / 2),
       ),
     );
+  }
+
     final sideAmount = size.width < size.height ? size.width : size.height*2;
     TextSpan spanAmount = TextSpan(
       style: innerAmountStyle,
